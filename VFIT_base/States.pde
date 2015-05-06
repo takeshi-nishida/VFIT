@@ -1,3 +1,4 @@
+
 State state;
 
 abstract class State {
@@ -46,7 +47,7 @@ class WaitState extends State {
     float cx = width * 0.5, cy = height * 0.5;
     line(cx - SIZE, cy, cx + SIZE, cy);
     line(cx, cy - SIZE, cx, cy + SIZE);
-    return ellapsedTime() > 3000 ? new StimulusState() : this;
+    return ellapsedTime() > WAIT_TIME ? new StimulusState() : this;
   }
 }
 
@@ -73,24 +74,35 @@ class StimulusState extends State {
   }
 
   public State processState() {
-    for (int i = 0; i < shapes.length; i++) {
-      float theta = TWO_PI * i / shapes.length + QUARTER_PI;
-      PShape s = shapes[order.get(i)];
-      shape(s, width * 0.5 + cos(theta) * SIZE - SIZE * 0.5, height * 0.5 + sin(theta) * SIZE - SIZE * 0.5);
-    }
-
-    if(!showOnHMD){
-      float x = width - SIZE, y = SIZE;
-      if(animate){
-        float d = SIZE * ellapsedTime() / 1000;
-        d = direction > 1 ? d : -d;
-        x += d * ((direction + 1) % 2);
-        y += d * (direction % 2);
+    float t = ellapsedTime();
+    if(t < STIMULUS_TIME){
+      for (int i = 0; i < shapes.length; i++) {
+        float theta = TWO_PI * i / shapes.length + QUARTER_PI;
+        PShape s = shapes[order.get(i)];
+        shape(s, width * 0.5 + cos(theta) * SIZE - SIZE * 0.5, height * 0.5 + sin(theta) * SIZE - SIZE * 0.5);
       }
-      drawArrow(x, y, direction * HALF_PI);
+  
+      if(!showOnHMD){
+        float x = width - SIZE, y = SIZE;
+        if(animate){
+          float d = SIZE * ellapsedTime() / 1000;
+          d = direction > 1 ? d : -d;
+          x += d * ((direction + 1) % 2);
+          y += d * (direction % 2);
+        }
+        drawArrow(x, y, direction * HALF_PI);
+      }
+    }
+    else{
+      float r = max((INPUT_TIME + STIMULUS_TIME - t) / INPUT_TIME * SIZE * 4, 0);
+      pushStyle();
+      noFill();
+      ellipse(width * 0.5, height * 0.5, r, r);
+      popStyle();
+      if(showOnHMD) sendStop();
     }
     
-    if(ellapsedTime() > STIMULUS_TIME){
+    if(t > STIMULUS_TIME + INPUT_TIME){
       logGo(false);
       return new AnswerState(direction);
     }
@@ -114,7 +126,6 @@ class AnswerState extends State {
 
   public AnswerState(int direction){
     super();
-    sendStop();
     this.direction = direction;
   }
   
