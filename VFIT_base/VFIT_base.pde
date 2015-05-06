@@ -5,7 +5,9 @@ import java.util.*;
 // Configuration
 int TOTAL_TRIALS  = 20; // Total number of trials
 int SIZE          = 100; // Size of the shapes
-int STIMULUS_TIME = 500; // [ms]
+int WAIT_TIME     = 3000; // Length of wait before each cycle [ms]
+int STIMULUS_TIME =  500; // Length of stimilus [ms]
+int INPUT_TIME    =  500; // Length of input wait after stimuls [ms]
 char GO_KEY = 'z';
 
 // Measures
